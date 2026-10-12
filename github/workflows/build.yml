@@ -15,7 +15,10 @@ jobs:
           distribution: 'temurin'
 
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+        uses: subosito/android-action@v2
+        with:
+          target-sdk-version: 34
+          build-tools-version: 34.0.0
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
