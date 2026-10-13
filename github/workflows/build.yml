@@ -1,35 +1,23 @@
 name: Build APK
-
-on: [push]
-
+on: [push, workflow_dispatch]
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
+      - uses: actions/setup-java@v4
+        with: {distribution: temurin, java-version: 17}
+      - uses: gradle/actions/setup-gradle@v4
+        with: {gradle-version: 8.9}
+      - name: Build debug APKs
+        run: |
+          DIR=.
+          if [ -f oyun-ceviri.zip ]; then
+            unzip -q oyun-ceviri.zip -d proj
+            DIR=proj
+          fi
+          gradle assembleDebug -p "$DIR"
+      - uses: actions/upload-artifact@v4
         with:
-          java-version: '17'
-          distribution: 'temurin'
-
-      - name: Setup Android SDK
-        uses: subosito/android-action@v2
-        with:
-          target-sdk-version: 34
-          build-tools-version: 34.0.0
-
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-
-      - name: Build APKs
-        run: ./gradlew assembleDebug
-
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-apks
-          path: |
-            app/build/outputs/apk/debug/app-debug.apk
-            tv/build/outputs/apk/debug/tv-debug.apk
+          name: oyun-ceviri-apks
+          path: "**/build/outputs/apk/debug/*.apk"
